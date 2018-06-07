@@ -1,0 +1,211 @@
+version: '2'
+services:
+  aai-resources.api.simpledemo.onap.org:
+    image: ${DOCKER_REGISTRY}/onap/aai-resources
+    hostname: aai-resources.api.simpledemo.onap.org
+    environment:
+      - LOCAL_USER_ID=${USER_ID}
+      - LOCAL_GROUP_ID=${GROUP_ID}
+      - SKIP_CREATE_DB_SCHEMA_AT_STARTUP=true
+    ports:
+      - 8447:8447
+    volumes:
+      - ${RESOURCES_LOGS}:/opt/aai/logroot/AAI-RES
+      - /opt/test-config/aai-resources/appconfig/janusgraph-realtime.properties:/opt/app/aai-resources/resources/etc/appprops/janusgraph-realtime.properties
+      - /opt/test-config/aai-resources/appconfig/janusgraph-cached.properties:/opt/app/aai-resources/resources/etc/appprops/janusgraph-cached.properties
+      - /opt/test-config/aai-resources/appconfig/aaiconfig.properties:/opt/app/aai-resources/resources/etc/appprops/aaiconfig.properties
+      - /opt/test-config/aai-resources/appconfig/application.properties:/opt/app/aai-resources/resources/application.properties
+      - /opt/test-config/aai-resources/appconfig/logback.xml:/opt/app/aai-resources/resources/logback.xml
+      - /opt/test-config/aai-resources/appconfig/localhost-access-logback.xml:/opt/app/aai-resources/resources/localhost-access-logback.xml
+      - /opt/test-config/aai-resources/appconfig/aai_keystore:/opt/app/aai-resources/resources/etc/auth/aai_keystore
+      - /opt/test-config/aai-resources/appconfig/realm.properties:/opt/app/aai-resources/resources/etc/auth/realm.properties
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "30m"
+        max-file: "5"
+  aai-traversal.api.simpledemo.onap.org:
+    image: ${DOCKER_REGISTRY}/onap/aai-traversal
+    hostname: aai-traversal.api.simpledemo.onap.org
+    environment:
+      - LOCAL_USER_ID=${USER_ID}
+      - LOCAL_GROUP_ID=${GROUP_ID}
+      - DISABLE_UPDATE_QUERY=true
+    volumes:
+      - ${TRAVERSAL_LOGS}:/opt/aai/logroot/AAI-GQ
+      - /opt/test-config/aai-traversal/appconfig/janusgraph-realtime.properties:/opt/app/aai-traversal/resources/etc/appprops/janusgraph-realtime.properties
+      - /opt/test-config/aai-traversal/appconfig/janusgraph-cached.properties:/opt/app/aai-traversal/resources/etc/appprops/janusgraph-cached.properties
+      - /opt/test-config/aai-traversal/appconfig/aaiconfig.properties:/opt/app/aai-traversal/resources/etc/appprops/aaiconfig.properties
+      - /opt/test-config/aai-traversal/appconfig/application.properties:/opt/app/aai-traversal/resources/application.properties
+      - /opt/test-config/aai-traversal/appconfig/logback.xml:/opt/app/aai-traversal/resources/logback.xml
+      - /opt/test-config/aai-traversal/appconfig/localhost-access-logback.xml:/opt/app/aai-traversal/resources/localhost-access-logback.xml
+      - /opt/test-config/aai-traversal/appconfig/aai_keystore:/opt/app/aai-traversal/resources/etc/auth/aai_keystore
+      - /opt/test-config/aai-traversal/appconfig/realm.properties:/opt/app/aai-traversal/resources/etc/auth/realm.properties
+    ports:
+      - 8446:8446
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "30m"
+        max-file: "5"
+  aai.api.simpledemo.onap.org:
+    image: ${AAI_HAPROXY_IMAGE}:${AAI_HAPROXY_VERSION}
+    hostname: aai.api.simpledemo.onap.org
+    ports:
+      - 8443:8443
+    links:
+      - aai-resources.api.simpledemo.onap.org
+      - aai-traversal.api.simpledemo.onap.org
+    volumes:
+      - /dev/log:/dev/log
+      - /opt/test-config/haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg
+      - /opt/test-config/haproxy/aai.pem:/etc/ssl/private/aai.pem
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "30m"
+        max-file: "5"
+
+  aai.searchservice.simpledemo.openecomp.org:
+    image: ${DOCKER_REGISTRY}/onap/search-data-service
+    hostname: aai.searchservice.simpledemo.openecomp.org
+    volumes:
+      - ${SEARCH_LOGS}:/logs
+      - /opt/test-config/search-data-service/appconfig:/opt/app/search-data-service/config
+    ports:
+      - 9509:9509
+    environment:
+      - CONFIG_HOME=/opt/app/search-data-service/config/
+      - KEY_STORE_PASSWORD=OBF:1y0q1uvc1uum1uvg1pil1pjl1uuq1uvk1uuu1y10
+      - KEY_MANAGER_PASSWORD=OBF:1y0q1uvc1uum1uvg1pil1pjl1uuq1uvk1uuu1y10
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "30m"
+        max-file: "5"
+
+  datarouter:
+    image: ${DOCKER_REGISTRY}/onap/data-router
+    hostname: data-router
+    volumes:
+      - ${DATA_ROUTER_LOGS}:/logs
+      - /opt/test-config/data-router/appconfig:/opt/app/data-router/config
+      - /opt/test-config/data-router/dynamic:/opt/app/data-router/dynamic
+    ports:
+      - 9502:9502
+    environment:
+      - CONFIG_HOME=/opt/app/data-router/config/
+      - KEY_STORE_PASSWORD=OBF:1y0q1uvc1uum1uvg1pil1pjl1uuq1uvk1uuu1y10
+      - KEY_MANAGER_PASSWORD=OBF:1y0q1uvc1uum1uvg1pil1pjl1uuq1uvk1uuu1y10
+      - DYNAMIC_ROUTES=/opt/app/data-router/dynamic/routes
+      - SERVICE_BEANS=/opt/app/data-router/dynamic/conf
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "30m"
+        max-file: "5"
+
+  model-loader:
+    image: ${DOCKER_REGISTRY}/onap/model-loader
+    hostname: model-loader
+    volumes:
+      - ${MODEL_LOADER_LOGS}:/logs
+      - /opt/test-config/model-loader/appconfig:/opt/app/model-loader/config
+    environment:
+      - CONFIG_HOME=/opt/app/model-loader/config/
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "30m"
+        max-file: "5"
+
+  sparky-be:
+    image: ${DOCKER_REGISTRY}/onap/sparky-be
+    hostname: sparky-be
+    volumes:
+      - ${UI_LOGS}:/logs
+      - /opt/test-config/sparky/appconfig:/opt/app/sparky/appconfig
+    ports:
+      - 9517:9517
+    environment:
+      - KEYSTORE_PASSWORD=OBF:1y0q1uvc1uum1uvg1pil1pjl1uuq1uvk1uuu1y10
+      - KEYSTORE_ALIAS_PASSWORD=OBF:1y0q1uvc1uum1uvg1pil1pjl1uuq1uvk1uuu1y10
+      - SPARKY_SSL_ENABLED=false
+      - SPARKY_PORTAL_ENABLED=true
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "30m"
+        max-file: "5"
+
+  champ-service:
+    image: ${DOCKER_REGISTRY}/onap/champ
+    hostname: champ-service
+    volumes:
+      - ${CHAMP_LOGS}:/logs
+      - /opt/test-config/champ-service/appconfig:/opt/app/champ-service/config
+      - /opt/test-config/champ-service/dynamic:/opt/app/champ-service/dynamic
+    ports:
+      - 9522:9522
+    environment:
+      - CONFIG_HOME=/opt/app/champ-service/config/
+      - KEY_STORE_PASSWORD=OBF:1y0q1uvc1uum1uvg1pil1pjl1uuq1uvk1uuu1y10
+      - KEY_MANAGER_PASSWORD=OBF:1y0q1uvc1uum1uvg1pil1pjl1uuq1uvk1uuu1y10
+      - AJSC_JETTY_ThreadCount_MIN=5
+      - AJSC_JETTY_ThreadCount_MAX=200
+      - AJSC_JETTY_BLOCKING_QUEUE_SIZE=200
+      - MAX_HEAP=1024
+      - SERVICE_BEANS=/opt/app/champ-service/dynamic/conf
+      - GRAPHIMPL=janus-deps
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "30m"
+        max-file: "5"
+
+  crud-service:
+    image: ${DOCKER_REGISTRY}/onap/gizmo
+    hostname: crud-service
+    volumes:
+      - ${CRUD_LOGS}:/logs
+      - /opt/test-config/crud-service/appconfig:/opt/app/crud-service/config
+      - /opt/test-config/crud-service/dynamic:/opt/app/crud-service/dynamic
+    ports:
+      - 9520:9520
+    environment:
+      - CONFIG_HOME=/opt/app/crud-service/config/
+      - KEY_STORE_PASSWORD=OBF:1y0q1uvc1uum1uvg1pil1pjl1uuq1uvk1uuu1y10
+      - KEY_MANAGER_PASSWORD=OBF:1y0q1uvc1uum1uvg1pil1pjl1uuq1uvk1uuu1y10
+      - AJSC_JETTY_ThreadCount_MIN=5
+      - AJSC_JETTY_ThreadCount_MAX=200
+      - AJSC_JETTY_BLOCKING_QUEUE_SIZE=200
+      - MAX_HEAP=1024
+      - SERVICE_BEANS=/opt/app/crud-service/dynamic/conf
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "30m"
+        max-file: "5"
+
+  babel:
+    image: ${DOCKER_REGISTRY}/onap/babel
+    hostname: babel
+    volumes:
+      - ${BABEL_LOGS}:/opt/app/babel/logs/AAI-BAS
+      - /opt/test-config/babel/appconfig:/opt/app/babel/config      
+    ports:
+      - 9516:9516
+    environment:
+      - CONFIG_HOME=/opt/app/babel/config/
+      - KEY_STORE_PASSWORD=OBF:1y0q1uvc1uum1uvg1pil1pjl1uuq1uvk1uuu1y10
+      - KEY_MANAGER_PASSWORD=OBF:1y0q1uvc1uum1uvg1pil1pjl1uuq1uvk1uuu1y10
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "30m"
+        max-file: "5"
+networks:
+  default:
+      driver: bridge
+      driver_opts:
+        com.docker.network.driver.mtu: ${MTU}
