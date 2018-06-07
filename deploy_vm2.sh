@@ -34,7 +34,7 @@ function wait_for_container() {
     done
 }
 
-docker pull $NEXUS_DOCKER_REPO/cassandra:2.1;
+# docker pull $NEXUS_DOCKER_REPO/cassandra:2.1;
 
 # cleanup
 $DOCKER_COMPOSE_CMD stop
