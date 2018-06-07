@@ -1,7 +1,7 @@
 version: '2'
 services:
   aai-resources.api.simpledemo.onap.org:
-    image: ${DOCKER_REGISTRY}/onap/aai-resources
+    image: ${DOCKER_REGISTRY}/onap/aai-resources:${RESOURCES_DOCKER_IMAGE_VERSION}
     hostname: aai-resources.api.simpledemo.onap.org
     environment:
       - LOCAL_USER_ID=${USER_ID}
@@ -25,7 +25,7 @@ services:
         max-size: "30m"
         max-file: "5"
   aai-traversal.api.simpledemo.onap.org:
-    image: ${DOCKER_REGISTRY}/onap/aai-traversal
+    image: ${DOCKER_REGISTRY}/onap/aai-traversal:${TRAVERSAL_DOCKER_IMAGE_VERSION}
     hostname: aai-traversal.api.simpledemo.onap.org
     environment:
       - LOCAL_USER_ID=${USER_ID}
@@ -67,7 +67,7 @@ services:
         max-file: "5"
 
   aai.searchservice.simpledemo.openecomp.org:
-    image: ${DOCKER_REGISTRY}/onap/search-data-service
+    image: ${DOCKER_REGISTRY}/onap/search-data-service:${SEARCH_DATA_SERVICE_DOCKER_IMAGE_VERSION}
     hostname: aai.searchservice.simpledemo.openecomp.org
     volumes:
       - ${SEARCH_LOGS}:/logs
@@ -85,7 +85,7 @@ services:
         max-file: "5"
 
   datarouter:
-    image: ${DOCKER_REGISTRY}/onap/data-router
+    image: ${DOCKER_REGISTRY}/onap/data-router:${DATA_ROUTER_DOCKER_IMAGE_VERSION}
     hostname: data-router
     volumes:
       - ${DATA_ROUTER_LOGS}:/logs
@@ -106,7 +106,7 @@ services:
         max-file: "5"
 
   model-loader:
-    image: ${DOCKER_REGISTRY}/onap/model-loader
+    image: ${DOCKER_REGISTRY}/onap/model-loader:${MODEL_LOADER_DOCKER_IMAGE_VERSION}
     hostname: model-loader
     volumes:
       - ${MODEL_LOADER_LOGS}:/logs
@@ -120,7 +120,7 @@ services:
         max-file: "5"
 
   sparky-be:
-    image: ${DOCKER_REGISTRY}/onap/sparky-be
+    image: ${DOCKER_REGISTRY}/onap/sparky-be:${SPARKY_BE_DOCKER_IMAGE_VERSION}
     hostname: sparky-be
     volumes:
       - ${UI_LOGS}:/logs
@@ -139,7 +139,7 @@ services:
         max-file: "5"
 
   champ-service:
-    image: ${DOCKER_REGISTRY}/onap/champ
+    image: ${DOCKER_REGISTRY}/onap/champ:${CHAMP_DOCKER_IMAGE_VERSION}
     hostname: champ-service
     volumes:
       - ${CHAMP_LOGS}:/logs
@@ -164,7 +164,7 @@ services:
         max-file: "5"
 
   crud-service:
-    image: ${DOCKER_REGISTRY}/onap/gizmo
+    image: ${DOCKER_REGISTRY}/onap/gizmo:${GIZMO_DOCKER_IMAGE_VERSION}
     hostname: crud-service
     volumes:
       - ${CRUD_LOGS}:/logs
@@ -188,7 +188,7 @@ services:
         max-file: "5"
 
   babel:
-    image: ${DOCKER_REGISTRY}/onap/babel
+    image: ${DOCKER_REGISTRY}/onap/babel:${BABEL_DOCKER_IMAGE_VERSION}
     hostname: babel
     volumes:
       - ${BABEL_LOGS}:/opt/app/babel/logs/AAI-BAS
