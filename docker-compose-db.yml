@@ -1,7 +1,7 @@
 version: '2'
 services:
   aai.hbase.simpledemo.onap.org:
-    image: cassandra:2.1
+    image: ${NEXUS_DOCKER_REPO}/cassandra:2.1
     hostname: aai.hbase.simpledemo.onap.org
     ports:
       - 7000:7000
@@ -21,7 +21,7 @@ services:
         max-size: "30m"
         max-file: "5"
   aai.elasticsearch.simpledemo.openecomp.org:
-    image: elasticsearch:2.4.1
+    image: ${NEXUS_DOCKER_REPO}/elasticsearch:2.4.1
     hostname: aai.elasticsearch.simpledemo.openecomp.org
     container_name: elasticsearch
     ports:
