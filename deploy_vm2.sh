@@ -7,7 +7,7 @@ else
     DOCKER_COMPOSE_CMD="docker-compose -f docker-compose-db.yml"
 fi
 
-export MTU=$(/sbin/ifconfig | grep MTU | sed 's/.*MTU://' | sed 's/ .*//' | sort -n | head -1);
+export MTU=$(/sbin/ifconfig | grep mtu | sed 's/.*mtu://' | sed 's/ .*//' | sort -n | head -1);
 export HBASE_IMAGE="${HBASE_IMAGE:-aaionap/hbase}";
 export HBASE_VERSION="${HBASE_VERSION:-1.2.0}";
 
