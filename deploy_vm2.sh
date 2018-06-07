@@ -10,6 +10,7 @@ fi
 export MTU=$(/sbin/ifconfig | grep mtu | sed 's/.*mtu //' | sed 's/ .*//' | sort -n | head -1);
 export HBASE_IMAGE="${HBASE_IMAGE:-aaionap/hbase}";
 export HBASE_VERSION="${HBASE_VERSION:-1.2.0}";
+export DOCKER_REGISTRY=$(cat /opt/config/nexus_docker_repo.txt)
 
 function wait_for_container() {
 
